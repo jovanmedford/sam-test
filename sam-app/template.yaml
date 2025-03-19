@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: >-
   sam-app
 Transform:
-- AWS::Serverless-2016-10-31
+  - AWS::Serverless-2016-10-31
 
 # Resources declares the AWS resources that you want to include in the stack
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
@@ -17,19 +17,20 @@ Resources:
       Handler: src/handlers/get-all-items.getAllItemsHandler
       Runtime: nodejs22.x
       Architectures:
-      - x86_64
+        - x86_64
       MemorySize: 128
       Timeout: 100
-      Description: A simple example includes a HTTP get method to get all items from
+      Description:
+        A simple example includes a HTTP get method to get all items from
         a DynamoDB table.
       Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
-      - DynamoDBCrudPolicy:
-          TableName: !Ref SampleTable
+        # Give Create/Read/Update/Delete Permissions to the WDIDTMTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref WDIDTMTable
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
-          SAMPLE_TABLE: !Ref SampleTable
+          WDIDTM_TABLE: !Ref WDIDTMTable
       Events:
         Api:
           Type: Api
@@ -46,19 +47,20 @@ Resources:
       Handler: src/handlers/get-by-id.getByIdHandler
       Runtime: nodejs22.x
       Architectures:
-      - x86_64
+        - x86_64
       MemorySize: 128
       Timeout: 100
-      Description: A simple example includes a HTTP get method to get one item by
+      Description:
+        A simple example includes a HTTP get method to get one item by
         id from a DynamoDB table.
       Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
-      - DynamoDBCrudPolicy:
-          TableName: !Ref SampleTable
+        # Give Create/Read/Update/Delete Permissions to the WDIDTMTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref WDIDTMTable
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
-          SAMPLE_TABLE: !Ref SampleTable
+          WDIDTM_TABLE: !Ref WDIDTMTable
       Events:
         Api:
           Type: Api
@@ -75,35 +77,41 @@ Resources:
       Handler: src/handlers/put-item.putItemHandler
       Runtime: nodejs22.x
       Architectures:
-      - x86_64
+        - x86_64
       MemorySize: 128
       Timeout: 100
-      Description: A simple example includes a HTTP post method to add one item to
+      Description:
+        A simple example includes a HTTP post method to add one item to
         a DynamoDB table.
       Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
-      - DynamoDBCrudPolicy:
-          TableName: !Ref SampleTable
+        # Give Create/Read/Update/Delete Permissions to the WDIDTMTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref WDIDTMTable
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
-          SAMPLE_TABLE: !Ref SampleTable
+          WDIDTM_TABLE: !Ref WDIDTMTable
       Events:
         Api:
           Type: Api
           Properties:
             Path: /
             Method: POST
-  # Simple syntax to create a DynamoDB table with a single attribute primary key, more in
-  # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlesssimpletable
 
-  # DynamoDB table to store item: {id: &lt;ID&gt;, name: &lt;NAME&gt;}
-  SampleTable:
-    Type: AWS::Serverless::SimpleTable
+  WDIDTMTable:
+    Type: AWS::DynamoDB::Table
     Properties:
-      PrimaryKey:
-        Name: id
-        Type: String
+      AttributeDefinitions:
+        - AttributeName: UserId
+          AttributeType: S
+        - AttributeName: Sk
+          AttributeType: S
+
+      KeySchema:
+        - AttributeName: UserId
+          KeyType: HASH
+        - AttributeName: Sk
+          KeyType: RANGE
       ProvisionedThroughput:
         ReadCapacityUnits: 2
         WriteCapacityUnits: 2
@@ -120,7 +128,7 @@ Resources:
     Properties:
       ResourceGroupName:
         Ref: ApplicationResourceGroup
-      AutoConfigurationEnabled: 'true'
+      AutoConfigurationEnabled: "true"
 Outputs:
   WebEndpoint:
     Description: API Gateway endpoint URL for Prod stage
